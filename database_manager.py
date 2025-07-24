@@ -1,42 +1,41 @@
-import pyodbc
+import sqlite3
 
 class DatabaseManager:
     def __init__(self):
         try:
-            self.conn = pyodbc.connect(
-                "DRIVER={ODBC Driver 17 for SQL Server};"
-                "SERVER=MERI\\SQLEXPRESS;"
-                "DATABASE=StokTakipDB;"
-                "Trusted_Connection=yes;"
-            )
+            self.conn = sqlite3.connect("stoktakip.db")
             self.cursor = self.conn.cursor()
-            print("[VERİTABANI] Bağlantı başarılı!")
-        except pyodbc.Error as e:
-            print(f"[VERİTABANI HATASI] Bağlantı hatası: {e}")
-            raise
+            self.create_tables_if_not_exists()
+        except sqlite3.Error as e:
+            print(f"Veritabanı bağlantı hatası: {e}")
+            self.conn = None
+
+    def create_tables_if_not_exists(self):
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS Products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            barkod_no TEXT,
+            urun_adi TEXT,
+            kategori TEXT,
+            stok_miktari INTEGER,
+            kritik_stok INTEGER,
+            birim TEXT,
+            alis_fiyat REAL
+        )
+        """)
+        self.conn.commit()
 
     def get_products(self):
-        try:
-            query = """
-            SELECT id, barkod_no, urun_adi, kategori, stok_miktari, kritik_stok, birim, satis_fiyat
-            FROM Products
-            """
-            self.cursor.execute(query)
-            products = self.cursor.fetchall()
-            return products
-        except pyodbc.Error as e:
-            print(f"[VERİTABANI HATASI] Ürünler alınamadı: {e}")
-            return []
+        self.cursor.execute("SELECT id, barkod_no, urun_adi, kategori, stok_miktari, kritik_stok, birim, alis_fiyat FROM Products")
+        return self.cursor.fetchall()
 
-    def add_product(self, barkod_no, urun_adi, kategori, stok_miktari, kritik_stok, birim, satis_fiyat):
+    def add_product(self, barkod_no, urun_adi, kategori, stok_miktari, kritik_stok, birim, alis_fiyat):
         try:
-            query = """
-            INSERT INTO Products (barkod_no, urun_adi, kategori, stok_miktari, kritik_stok, birim, satis_fiyat)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """
-            self.cursor.execute(query, (barkod_no, urun_adi, kategori, stok_miktari, kritik_stok, birim, satis_fiyat))
+            self.cursor.execute(
+                "INSERT INTO Products (barkod_no, urun_adi, kategori, stok_miktari, kritik_stok, birim, alis_fiyat) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (barkod_no, urun_adi, kategori, stok_miktari, kritik_stok, birim, alis_fiyat)
+            )
             self.conn.commit()
-            print("[VERİTABANI] Ürün eklendi.")
-        except pyodbc.Error as e:
-            print(f"[VERİTABANI HATASI] Ürün eklenemedi: {e}")
+        except sqlite3.Error as e:
+            print(f"Ürün eklenirken hata oluştu: {e}")
             raise
