@@ -1,0 +1,46 @@
+# ...existing imports...
+from PyQt5.QtGui import QPixmap, QFont
+
+class StokTakipMainApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.db_manager = DatabaseManager()
+        if not self.db_manager.conn:
+            QMessageBox.critical(self, "Veritabanı Bağlantı Hatası", "Veritabanı bağlantısı kurulamadı.")
+            sys.exit(1)
+        self.setWindowTitle("PyQt Stok Takip Sistemi")
+        self.setGeometry(100, 100, 1200, 700)
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.main_layout = QVBoxLayout(self.central_widget)
+
+        self.init_header()
+        self.init_ui()
+        self.load_products()
+
+    def init_header(self):
+        header_layout = QVBoxLayout()
+        header_layout.setAlignment(Qt.AlignHCenter)
+
+        # Logo PNG ekle
+        logo_label = QLabel()
+        pixmap = QPixmap("Yozgat_Valiliği_logo.png")
+        pixmap = pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        logo_label.setPixmap(pixmap)
+        logo_label.setAlignment(Qt.AlignCenter)
+        header_layout.addWidget(logo_label)
+
+        # Yozgat Valiliği başlığı
+        valilik_label = QLabel("Yozgat Valiliği")
+        valilik_label.setFont(QFont("Arial", 24, QFont.Bold))
+        valilik_label.setAlignment(Qt.AlignCenter)
+        header_layout.addWidget(valilik_label)
+
+        # Stok Takip başlığı
+        stok_label = QLabel("Stok Takip")
+        stok_label.setFont(QFont("Arial", 18, QFont.Bold))
+        stok_label.setAlignment(Qt.AlignCenter)
+        header_layout.addWidget(stok_label)
+
+        # Header'ı ana layout'un en üstüne ekle
+        self.main_layout.addLayout(header_layout)

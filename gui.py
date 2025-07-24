@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QHBoxLayout, QHeaderView, QSizePolicy, QSpacerItem, QFormLayout
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QDoubleValidator, QIntValidator
+from PyQt5.QtGui import QDoubleValidator, QIntValidator, QPixmap, QFont
 from datetime import datetime
 
 from database_manager import DatabaseManager
@@ -27,8 +27,42 @@ class StokTakipMainApp(QMainWindow):
         self.setCentralWidget(self.central_widget)
         self.main_layout = QVBoxLayout(self.central_widget)
 
+        self.init_header()  # <-- Yeni fonksiyon
         self.init_ui()
         self.load_products()
+
+    def init_header(self):
+        header_layout = QHBoxLayout()
+        header_layout.setAlignment(Qt.AlignTop)
+
+        # Ortada başlıklar
+        title_layout = QVBoxLayout()
+        title_layout.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+
+        valilik_label = QLabel("Yozgat Valiliği")
+        valilik_label.setFont(QFont("Arial", 22, QFont.Bold))
+        valilik_label.setAlignment(Qt.AlignCenter)
+        title_layout.addWidget(valilik_label)
+
+        stok_label = QLabel("Stok Takip")
+        stok_label.setFont(QFont("Arial", 16, QFont.Bold))
+        stok_label.setAlignment(Qt.AlignCenter)
+        title_layout.addWidget(stok_label)
+
+        # Ortalamak için önce boşluk, sonra başlıklar, sonra tekrar boşluk ekle
+        header_layout.addStretch()
+        header_layout.addLayout(title_layout)
+        header_layout.addStretch()
+
+        # Logo sağ üstte
+        logo_label = QLabel()
+        pixmap = QPixmap("Yozgat_Valiliği_logo.png")
+        pixmap = pixmap.scaled(80, 80, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        logo_label.setPixmap(pixmap)
+        logo_label.setAlignment(Qt.AlignRight | Qt.AlignTop)
+        header_layout.addWidget(logo_label)
+
+        self.main_layout.addLayout(header_layout)
 
     def init_ui(self):
         search_layout = QHBoxLayout()
